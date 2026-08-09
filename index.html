@@ -97,27 +97,38 @@
   .empty{color:var(--ink-faint);text-align:center;padding:70px 0;font-size:15px}
 
   /* ---------- SIMULATOR ---------- */
-  .sim-wrap{padding:22px 34px 60px;display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:start}
-  @media(max-width:900px){.sim-wrap{grid-template-columns:1fr;gap:20px}}
+  .sim-wrap{padding:22px 34px 60px;display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:24px;align-items:start}
+  @media(max-width:1200px){.sim-wrap{grid-template-columns:minmax(0,1fr) 230px;gap:18px}}
+  @media(max-width:560px){.sim-wrap{grid-template-columns:1fr;gap:20px}}
 
   .sim-left{display:flex;flex-direction:column;gap:6px}
   .sim-panel-title{font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:11px;color:var(--ink-dim);margin:0 2px 8px;display:flex;align-items:center;gap:10px}
   .sim-panel-title .clr{margin-left:auto;font-weight:400;letter-spacing:.02em;text-transform:none;color:var(--cognac-d);cursor:pointer;font-size:12px}
   .pig-list{display:flex;flex-direction:column;gap:3px}
-  .pig-row{display:flex;align-items:center;gap:12px;padding:9px 6px;border-radius:var(--r-sm);transition:.12s}
+  .pig-row{display:flex;align-items:center;gap:10px;padding:9px 6px;border-radius:var(--r-sm);transition:.12s}
   .pig-row.on{background:var(--cognac-soft)}
   .pig-row .pd{width:22px;height:22px;border-radius:50%;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(0,0,0,.14)}
   .pig-row .pn{flex:1;font-size:12.5px;color:var(--ink);letter-spacing:.02em;min-width:0}
   .pig-row .pn small{display:block;color:var(--ink-faint);font-size:10px;letter-spacing:.04em}
-  .slider{flex:1.4;max-width:170px;accent-color:var(--cognac);height:4px;cursor:pointer}
+  .slider{flex:1;min-width:56px;max-width:150px;accent-color:var(--cognac);height:4px;cursor:pointer}
   input[type=range].slider{-webkit-appearance:none;appearance:none;background:var(--line);border-radius:3px;height:4px}
   input[type=range].slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--cognac);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.25);border:2px solid #fff}
-  .pig-row .pv{width:52px;text-align:right;font-variant-numeric:tabular-nums;font-size:13px;color:var(--ink-2)}
-  .pig-row .pv b{color:var(--cognac-d);font-weight:600}
+  .pig-row .pval{display:flex;align-items:center;gap:0;flex:0 0 auto;border:1px solid var(--field-border);
+    border-radius:var(--r-field);overflow:hidden;background:var(--paper);height:32px}
+  .pig-row.on .pval{border-color:var(--cognac-border)}
+  .pig-row .pval button{width:26px;height:30px;border:none;background:transparent;color:var(--ink-2);
+    font-size:17px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;transition:.1s;-webkit-user-select:none;user-select:none}
+  .pig-row .pval button:hover{background:var(--paper-2);color:var(--cognac-d)}
+  .pig-row .pval button:active{background:var(--cognac-soft)}
+  .pig-row .pval input{width:44px;border:none;outline:none;text-align:center;font-family:var(--font-body);
+    font-size:13px;color:var(--ink);background:transparent;font-variant-numeric:tabular-nums;-moz-appearance:textfield;padding:0}
+  .pig-row .pval input::-webkit-outer-spin-button,.pig-row .pval input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .pig-row.on .pval input{color:var(--cognac-d);font-weight:600}
+  .pig-row .punit{font-size:11px;color:var(--ink-faint);margin-left:5px;flex:0 0 auto;width:14px}
 
   .sim-right{position:sticky;top:20px;display:flex;flex-direction:column;gap:16px}
   .result-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;box-shadow:var(--shadow-card)}
-  .result-swatch{height:150px;transition:background .15s;position:relative}
+  .result-swatch{height:230px;transition:background .15s;position:relative}
   .result-swatch .rhex{position:absolute;bottom:10px;right:12px;font-size:12px;font-variant-numeric:tabular-nums;padding:4px 9px;border-radius:6px;backdrop-filter:blur(6px)}
   .result-body{padding:16px 18px 18px}
   .result-body h3{font-family:var(--font-disp);font-size:18px;margin:0 0 3px;color:var(--ink);letter-spacing:.02em}
@@ -289,7 +300,7 @@
         <div class="sim-left">
           <div class="sim-panel-title">Пігменти <span class="clr" id="simClear">Очистити</span></div>
           <div class="pig-list" id="pigList"></div>
-          <div class="sim-note">Рухайте повзунки — застосунок покаже приблизний колір суміші та найближчі відтінки Fenice з готовими рецептами. Це орієнтир: фінал звіряйте зі зразком.</div>
+          <div class="sim-note">Рухайте повзунки або вводьте значення вручну — застосунок покаже приблизний колір суміші та найближчі відтінки Fenice з готовими рецептами. Це орієнтир: фінал звіряйте зі зразком.</div>
         </div>
         <div class="sim-right">
           <div class="result-card">
@@ -476,6 +487,10 @@ document.getElementById('q').addEventListener('input',function(e){mstate.q=e.tar
 /* ===== SIMULATOR ===== */
 var simVals=new Array(PIGS.length).fill(0);
 var pigListEl=document.getElementById('pigList');
+var STEP=0.1, VMAX=100;
+function fmtVal(v){ // show without trailing .0 when integer
+  return (Math.round(v*10)/10).toString().replace('.',',');
+}
 function buildPigList(){
   var html='';
   PIGS.forEach(function(p,i){
@@ -483,13 +498,51 @@ function buildPigList(){
     html+='<div class="pig-row" id="pigrow'+i+'">'
       +'<span class="pd" style="background:'+p.dot+'"></span>'
       +'<span class="pn">'+parts[0]+'<small>'+(parts[1]||'')+'</small></span>'
-      +'<input type="range" class="slider" min="0" max="100" value="0" data-i="'+i+'">'
-      +'<span class="pv" id="pv'+i+'">0</span></div>';
+      +'<input type="range" class="slider" min="0" max="'+VMAX+'" step="'+STEP+'" value="0" data-i="'+i+'">'
+      +'<span class="pval">'
+        +'<button type="button" data-dec="'+i+'" aria-label="менше">−</button>'
+        +'<input type="text" inputmode="decimal" id="num'+i+'" data-n="'+i+'" value="0">'
+        +'<button type="button" data-inc="'+i+'" aria-label="більше">+</button>'
+      +'</span>'
+      +'<span class="punit">%</span>'
+      +'</div>';
   });
   pigListEl.innerHTML=html;
+  // slider -> value
   pigListEl.querySelectorAll('input[type=range]').forEach(function(sl){
-    sl.addEventListener('input',function(){var i=+sl.dataset.i;simVals[i]=+sl.value;document.getElementById('pv'+i).textContent=sl.value;updateSim();});
+    sl.addEventListener('input',function(){var i=+sl.dataset.i;setPig(i,+sl.value,'slider');});
   });
+  // number field typing
+  pigListEl.querySelectorAll('input[data-n]').forEach(function(inp){
+    inp.addEventListener('input',function(){
+      var i=+inp.dataset.n;
+      var raw=inp.value.replace(',','.').replace(/[^0-9.]/g,'');
+      var v=parseFloat(raw); if(isNaN(v))v=0; v=Math.min(VMAX,Math.max(0,v));
+      setPig(i,v,'number');
+    });
+    inp.addEventListener('blur',function(){ // normalize display on blur
+      var i=+inp.dataset.n; inp.value=fmtVal(simVals[i]);
+    });
+    inp.addEventListener('focus',function(){this.select();});
+  });
+  // steppers
+  pigListEl.querySelectorAll('button[data-inc]').forEach(function(b){
+    b.addEventListener('click',function(){var i=+b.dataset.inc;setPig(i,Math.min(VMAX,Math.round((simVals[i]+STEP)*10)/10),'step');});
+  });
+  pigListEl.querySelectorAll('button[data-dec]').forEach(function(b){
+    b.addEventListener('click',function(){var i=+b.dataset.dec;setPig(i,Math.max(0,Math.round((simVals[i]-STEP)*10)/10),'step');});
+  });
+}
+function setPig(i,v,src){
+  v=Math.round(v*10)/10;
+  simVals[i]=v;
+  // sync slider
+  var sl=pigListEl.querySelector('input[type=range][data-i="'+i+'"]'); if(sl&&src!=='slider')sl.value=v;
+  if(sl&&src==='slider')sl.value=v;
+  // sync number (don't fight the user's caret while typing)
+  var num=document.getElementById('num'+i);
+  if(num&&src!=='number')num.value=fmtVal(v);
+  updateSim();
 }
 function updateSim(){
   var total=simVals.reduce(function(a,b){return a+b;},0);
@@ -498,13 +551,9 @@ function updateSim(){
     if(v>0)active.push({idx:i,w:v/total});});
   var resSw=document.getElementById('resSwatch'),resBody=document.getElementById('resBody'),
       resHex=document.getElementById('resHex'),nearList=document.getElementById('nearList');
-  // update pv highlight (dominant)
-  var mx=Math.max.apply(null,simVals);
-  simVals.forEach(function(v,i){var pv=document.getElementById('pv'+i);
-    pv.innerHTML = v>0 ? (v===mx?'<b>'+pctOf(v,total)+'%</b>':pctOf(v,total)+'%') : '0';});
   if(!active.length){
     resSw.style.background='var(--paper-2)';resHex.textContent='';resHex.style.display='none';
-    resBody.innerHTML='<div class="mix-empty">Додайте пігменти повзунками, щоб побачити колір суміші</div>';
+    resBody.innerHTML='<div class="mix-empty">Додайте пігменти повзунками або введіть значення, щоб побачити колір суміші</div>';
     nearList.innerHTML='';return;
   }
   var rgb=mixRGB(active);
@@ -512,12 +561,11 @@ function updateSim(){
   resSw.style.background=hex;resHex.style.display='';
   var dark=(0.299*rgb[0]+0.587*rgb[1]+0.114*rgb[2])<140;
   resHex.textContent=hex;resHex.style.color=dark?'#fff':'#111';resHex.style.background=dark?'rgba(0,0,0,.25)':'rgba(255,255,255,.5)';
-  // recipe text
-  var comps=active.map(function(a){return {name:PIGS[a.idx].name,pct:pctOf(simVals[a.idx],total),dot:PIGS[a.idx].dot};})
+  // recipe text — normalized percentage of total, one decimal
+  var comps=active.map(function(a){return {name:PIGS[a.idx].name,pct:simVals[a.idx]/total*100,dot:PIGS[a.idx].dot};})
                   .sort(function(a,b){return b.pct-a.pct;});
-  var rlist=comps.map(function(c){return '<span style="display:inline-flex;align-items:center;gap:5px;margin-right:10px"><span style="width:9px;height:9px;border-radius:50%;background:'+c.dot+';display:inline-block"></span>'+c.name.split(' / ')[0]+' '+c.pct+'%</span>';}).join('');
+  var rlist=comps.map(function(c){return '<span style="display:inline-flex;align-items:center;gap:5px;margin-right:10px"><span style="width:9px;height:9px;border-radius:50%;background:'+c.dot+';display:inline-block"></span>'+c.name.split(' / ')[0]+' '+fmtVal(c.pct)+'%</span>';}).join('');
   resBody.innerHTML='<h3>Ваша суміш</h3><div class="rsub" style="margin-top:8px;line-height:1.9">'+rlist+'</div>';
-  // nearest matches
   var lab=rgb2lab(rgb[0],rgb[1],rgb[2]);
   var scored=COLORS.map(function(x){return {x:x,d:deltaE(lab,x._lab)};}).sort(function(a,b){return a.d-b.d;}).slice(0,3);
   nearList.innerHTML=scored.map(function(s){
@@ -528,10 +576,10 @@ function updateSim(){
       +'<span class="ndelta" style="color:'+q[0]+'"><span class="match-dot" style="background:'+q[0]+'"></span>'+q[1]+'<b>ΔE '+s.d.toFixed(1)+'</b></span></button>';
   }).join('');
 }
-function pctOf(v,total){return Math.round(v/total*100);}
 document.getElementById('simClear').onclick=function(){
   simVals=new Array(PIGS.length).fill(0);
   pigListEl.querySelectorAll('input[type=range]').forEach(function(sl){sl.value=0;});
+  pigListEl.querySelectorAll('input[data-n]').forEach(function(inp){inp.value='0';});
   updateSim();
 };
 buildPigList();updateSim();
