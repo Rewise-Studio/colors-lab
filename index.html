@@ -40,17 +40,16 @@
   .sb-top{display:flex;align-items:center;padding:6px 14px 18px;gap:8px}
   .logo{font-family:var(--font-disp);letter-spacing:.22em;font-size:19px;color:#fff;flex:1;min-width:0;overflow:hidden;white-space:nowrap}
   .logo-mini{display:none}
-  .sidebar.collapsed .sb-top{padding:6px 0 18px;justify-content:center}
-  .sidebar.collapsed .logo{flex:0 0 auto}
-  .sidebar.collapsed .logo-full{display:none}
-  .sidebar.collapsed .logo-mini{display:inline}
+  .sidebar.collapsed .sb-top{padding:6px 0 14px;flex-direction:column;justify-content:center;gap:6px}
+  .sidebar.collapsed .logo{flex:0 0 auto;font-size:14px;letter-spacing:.06em;text-align:center}
+  .sidebar.collapsed .logo-mini{display:none}
   .sb-toggle{width:26px;height:26px;flex:0 0 auto;border:1px solid var(--sidebar-line);background:transparent;
     border-radius:7px;color:var(--sidebar-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.14s}
   .sb-toggle:hover{background:var(--sidebar-2);color:#fff}
   .sb-toggle svg{transition:transform .2s}
   .sidebar.collapsed .sb-toggle svg{transform:rotate(180deg)}
-  .sidebar.collapsed .sb-toggle{position:absolute;left:64px;top:18px;background:var(--sidebar);border:1px solid var(--sidebar-line);
-    transform:translateX(-50%);box-shadow:0 2px 6px rgba(0,0,0,.3)}
+  .sidebar.collapsed .sb-toggle{width:40px;height:22px;border:none;background:transparent;box-shadow:none;color:var(--sidebar-faint)}
+  .sidebar.collapsed .sb-toggle:hover{background:transparent;color:#fff}
   .nav{display:flex;flex-direction:column;gap:2px;padding:0 14px}
   .sidebar.collapsed .nav{padding:0 10px}
   .nav a{display:flex;align-items:center;gap:13px;padding:11px 12px;border-radius:10px;
@@ -73,7 +72,9 @@
 
   /* ---------- MAIN ---------- */
   .main{flex:1;min-width:0;display:flex;flex-direction:column}
-  .topbar{padding:26px 34px 0;display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap}
+  .topbar{padding:26px 34px 0;display:flex;align-items:flex-end;gap:18px;flex-wrap:nowrap}
+  .topbar>div:first-child{min-width:0}
+  .page-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .page-title{font-family:var(--font-disp);font-size:30px;letter-spacing:.02em;color:var(--ink);margin:0;line-height:1}
   .page-sub{font-size:13px;color:var(--ink-dim);margin-top:7px}
   .brandmark{margin-left:auto;display:flex;align-items:center;gap:10px}
@@ -166,6 +167,7 @@
   .result-body h3{font-family:var(--font-disp);font-size:18px;margin:0 0 3px;color:var(--ink);letter-spacing:.02em}
   .result-body .rsub{font-size:12px;color:var(--ink-dim)}
   .mix-empty{padding:26px 18px;text-align:center;color:var(--ink-faint);font-size:13px;line-height:1.5}
+  #camResSwatch{height:280px}
   .cam-res-head{display:flex;align-items:stretch;gap:14px}
   .cam-res-head .crh-txt{display:flex;flex-direction:column;justify-content:center;flex:0 0 auto}
   .cam-res-head .crh-txt h3{font-family:var(--font-disp);font-size:18px;margin:0;color:var(--ink);letter-spacing:.02em;line-height:1.2}
@@ -192,13 +194,13 @@
   .cam-wrap{padding:22px 34px 40px;display:flex;flex-direction:column;gap:16px}
   .cam-lower{display:flex;gap:16px;align-items:stretch}
   .cam-near-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
-  .cam-side{flex:0 0 260px;display:flex;flex-direction:column;gap:12px;background:#14110E;
+  .cam-side{flex:0 0 156px;display:flex;flex-direction:column;background:#14110E;
     border-radius:var(--r-card);overflow:hidden;box-shadow:var(--shadow-card)}
   @media(max-width:640px){
     .cam-wrap{padding:18px 18px 32px}
-    .cam-side{flex:0 0 200px}
+    .cam-side{flex:0 0 132px}
   }
-  .cam-stage{position:relative;width:100%;flex:1;min-height:170px;background:#14110E;
+  .cam-stage{position:relative;width:100%;flex:1;min-height:120px;background:#14110E;
     overflow:hidden;display:flex;align-items:center;justify-content:center}
   .cam-stage video,.cam-stage img{width:100%;height:100%;object-fit:cover;display:none}
   .cam-stage.live video{display:block}
@@ -360,10 +362,9 @@
     .tabbar a svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7}
     .tabbar a.active{color:#fff}
     .tabbar a.active svg{stroke:var(--cognac)}
-    .topbar{padding:20px 20px 0}
+    .topbar{padding:20px 20px 0;flex-wrap:nowrap}
     .controls,.groups,.content,.sim-wrap{padding-left:20px;padding-right:20px}
     .page-title{font-size:26px}
-    .brandmark{width:100%;margin-left:0;order:3;margin-top:4px}
   }
 </style>
 </head>
@@ -377,7 +378,7 @@
     </div>
     <nav class="nav" id="navMain">
       <a data-view="map" class="active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Карта</span></a>
-      <a data-view="sim"><svg viewBox="0 0 24 24"><path d="M4 20 L12 4 L20 20"/><path d="M7 14h10"/></svg><span>Підбір</span></a>
+      <a data-view="sim"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v5L5.5 18a2 2 0 0 0 1.9 2.6h9.2A2 2 0 0 0 18.5 18L14 8V3"/><path d="M7.5 14h9"/></svg><span>Лабораторія</span></a>
       <a data-view="cam"><svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L19 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" transform="translate(-1 0)"/><circle cx="11" cy="12.5" r="3.5"/></svg><span>Камера</span></a>
       <a data-view="coll"><svg viewBox="0 0 24 24"><path d="m12 2 2.6 6.4L21 9l-4.9 4.3L17.5 20 12 16.6 6.5 20l1.4-6.7L3 9l6.4-.6z"/></svg><span>Колекція</span></a>
       <a data-view="soon1"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg><span>Рецептура</span></a>
@@ -498,7 +499,7 @@
   <!-- bottom tab bar -->
   <nav class="tabbar" id="tabbar">
     <a data-view="map" class="active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Карта</span></a>
-    <a data-view="sim"><svg viewBox="0 0 24 24"><path d="M4 20 L12 4 L20 20"/><path d="M7 14h10"/></svg><span>Підбір</span></a>
+    <a data-view="sim"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v5L5.5 18a2 2 0 0 0 1.9 2.6h9.2A2 2 0 0 0 18.5 18L14 8V3"/><path d="M7.5 14h9"/></svg><span>Лабораторія</span></a>
     <a data-view="cam"><svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L19 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" transform="translate(-1 0)"/><circle cx="11" cy="12.5" r="3.5"/></svg><span>Камера</span></a>
     <a data-view="coll"><svg viewBox="0 0 24 24"><path d="m12 2 2.6 6.4L21 9l-4.9 4.3L17.5 20 12 16.6 6.5 20l1.4-6.7L3 9l6.4-.6z"/></svg><span>Колекція</span></a>
     <a data-view="soon1"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg><span>Рецептура</span></a>
@@ -620,7 +621,7 @@ function mixRGB(weights){ // weights: [{idx,w}], w fractions
 
 /* ===== view switching ===== */
 var VIEWS={map:['Карта кольорів','Фарби для шкіри · рецептура змішування'],
-           sim:['Підбір кольору','Симулятор змішування пігментів'],
+           sim:['Лабораторія','Симулятор змішування пігментів'],
            cam:['Камера','Визначення кольору з камери або фото'],
            coll:['Колекція','Ваші збережені кольори та рецепти'],
            soon1:['Рецептура','—'],soon2:['Матеріали','—']};
@@ -862,7 +863,7 @@ function openColor(code){
     +'<div class="recipe">'+rows+'</div>'
     +'<div class="modal-actions">'
       +'<button class="m-act" id="mActCopy"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/></svg>Копіювати рецепт</button>'
-      +'<button class="m-act primary" id="mActLab"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20 L12 4 L20 20"/><path d="M7 14h10"/></svg>У лабораторію</button>'
+      +'<button class="m-act primary" id="mActLab"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 3h6M10 3v5L5.5 18a2 2 0 0 0 1.9 2.6h9.2A2 2 0 0 0 18.5 18L14 8V3"/><path d="M7.5 14h9"/></svg>В лабораторію</button>'
     +'</div>'
     +'<div class="modal-actions">'
       +'<button class="m-act" id="mActSave" style="width:100%"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 2 2.6 6.4L21 9l-4.9 4.3L17.5 20 12 16.6 6.5 20l1.4-6.7L3 9l6.4-.6z"/></svg>Зберегти в колекцію</button>'
@@ -884,7 +885,7 @@ function sendColorToLab(x){
   loadRecipeToSim(x.r);
   closeModal();
   switchView('sim');
-  showToast('Рецепт HP '+x.c+' перенесено у Підбір');
+  showToast('Рецепт HP '+x.c+' перенесено в лабораторію');
 }
 function loadRecipeToSim(recipe){
   for(var i=0;i<PIGS.length;i++) setPig(i,0,'load');
@@ -948,11 +949,11 @@ function camRenderResult(rawRgb){
   var dark=(0.299*rgb[0]+0.587*rgb[1]+0.114*rgb[2])<140;
   hexEl.textContent=hex;hexEl.style.color=dark?'#fff':'#111';hexEl.style.background=dark?'rgba(0,0,0,.25)':'rgba(255,255,255,.5)';
   var lab=rgb2lab(rgb[0],rgb[1],rgb[2]);
-  var scored=COLORS.map(function(x){return {x:x,d:deltaE(lab,x._lab)};}).sort(function(a,b){return a.d-b.d;}).slice(0,3);
+  var scored=COLORS.map(function(x){return {x:x,d:deltaE(lab,x._lab)};}).sort(function(a,b){return a.d-b.d;}).slice(0,5);
   window.__camLastHex=hex; window.__camLastNearest=scored[0]?scored[0].x:null;
   bodyEl.innerHTML='<div class="cam-res-head"><div class="crh-txt"><h3>Колір під прицілом</h3><div class="rsub">RGB '+rgb.join(', ')+(isCalib?' · збаланс.':'')+'</div></div>'
     +'<div class="crh-acts">'
-    +'<button class="m-act primary" id="camToLab"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20 L12 4 L20 20"/><path d="M7 14h10"/></svg>У Підбір</button>'
+    +'<button class="m-act primary" id="camToLab"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 3h6M10 3v5L5.5 18a2 2 0 0 0 1.9 2.6h9.2A2 2 0 0 0 18.5 18L14 8V3"/><path d="M7.5 14h9"/></svg>В лабораторію</button>'
     +'<button class="m-act" id="camSaveBtn"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 2 2.6 6.4L21 9l-4.9 4.3L17.5 20 12 16.6 6.5 20l1.4-6.7L3 9l6.4-.6z"/></svg>Зберегти в колекцію</button>'
     +'</div></div>';
   var btn=document.getElementById('camToLab');
@@ -971,7 +972,7 @@ function sendCameraColorToLab(hex,nearest){
   if(nearest) loadRecipeToSim(nearest.r);
   switchView('sim');
   renderSimTarget();
-  showToast('Колір з камери перенесено у Підбір як ціль');
+  showToast('Колір з камери перенесено в лабораторію як ціль');
 }
 var lastSampleTS=0;
 function camLiveLoop(){
@@ -1234,7 +1235,7 @@ function openCollItem(id){
     +'<div class="m-rename"><input type="text" id="renameRu" value="'+it.nameRu.replace(/"/g,'&quot;')+'" placeholder="Назва рос."></div>'
     +'<div class="modal-actions">'
       +'<button class="m-act" id="mActRename">Перейменувати</button>'
-      +(it.recipe?'<button class="m-act primary" id="mActLabColl">У лабораторію</button>':'<span></span>')
+      +(it.recipe?'<button class="m-act primary" id="mActLabColl">В лабораторію</button>':'<span></span>')
     +'</div>'
     +'<div class="modal-actions">'
       +(it.recipe?'<button class="m-act" id="mActCopyColl">Копіювати рецепт</button>':'<span></span>')
@@ -1250,7 +1251,7 @@ function openCollItem(id){
     openCollItem(id);
   };
   var lab=document.getElementById('mActLabColl');
-  if(lab) lab.onclick=function(){ loadRecipeToSim(it.recipe); closeModal(); switchView('sim'); showToast('Рецепт перенесено у Підбір'); };
+  if(lab) lab.onclick=function(){ loadRecipeToSim(it.recipe); closeModal(); switchView('sim'); showToast('Рецепт перенесено в лабораторію'); };
   var cp=document.getElementById('mActCopyColl');
   if(cp) cp.onclick=function(){
     var lines=it.nameUa+' / '+it.nameRu+' · '+it.hex+'\n'
