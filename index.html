@@ -206,12 +206,12 @@
   .cam-wrap{padding:22px 34px 40px;display:flex;flex-direction:column;gap:16px}
   .cam-lower{display:flex;gap:16px;align-items:stretch}
   .cam-near-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:8px}
-  .cam-side{flex:1 1 0;min-width:0;display:flex;flex-direction:column;background:#14110E;
+  .cam-side{flex:1 1 0;min-width:0;align-self:stretch;display:flex;flex-direction:column;background:#14110E;
     border-radius:var(--r-card);overflow:hidden;box-shadow:var(--shadow-card)}
   @media(max-width:640px){
     .cam-wrap{padding:18px 18px 32px}
   }
-  .cam-stage{position:relative;width:100%;flex:1;min-height:120px;background:#14110E;
+  .cam-stage{position:relative;width:100%;flex:1 1 0;min-height:0;background:#14110E;
     overflow:hidden;display:flex;align-items:center;justify-content:center}
   .cam-stage video,.cam-stage img{width:100%;height:100%;object-fit:cover;display:none}
   .cam-stage.live video{display:block}
@@ -622,27 +622,42 @@ function suggestName(hex){
   return best?{ua:best[0],ru:best[1],d:bestD}:null;
 }
 
-/* ===== spectral mixing engine ===== */
-function ks_from_R(R){var e=1e-5;var r=Math.min(Math.max(R,e),1-e);return (1-r)*(1-r)/(2*r);}
-function R_from_ks(ks){ks=Math.max(ks,0);return 1+ks-Math.sqrt(ks*ks+2*ks);}
+/* ===== mixing engine =====
+   Субтрактивна модель змішування по кольорах пігментів (dot).
+   Спектральні дані (ENGINE.pigs[].R) навмисно не використовуються для розрахунку:
+   вони синтетичні й давали фізично неможливі артефакти (чорний+білий=синій).
+   Модель — для практики й відчуття кольору, не для точного передбачення рецептури.
+   Спектри лишаються в ENGINE на випадок майбутніх реальних вимірів спектрофотометром. */
 var Bn=ENGINE.B, PIGS=ENGINE.pigs;
-// precompute KS per pigment per band
-PIGS.forEach(function(p){p._ks=p.R.map(ks_from_R);});
-function mixRGB(weights){ // weights: [{idx,w}], w fractions
-  var C=weights.map(function(x){return x.w*PIGS[x.idx].t;});
-  var s=C.reduce(function(a,b){return a+b;},0)||1e-9; C=C.map(function(v){return v/s;});
-  var X=0,Y=0,Z=0;
-  for(var b=0;b<Bn;b++){
-    var ksm=0;
-    for(var j=0;j<weights.length;j++) ksm+=C[j]*PIGS[weights[j].idx]._ks[b];
-    var R=R_from_ks(ksm);
-    X+=R*ENGINE.wX[b];Y+=R*ENGINE.wY[b];Z+=R*ENGINE.wZ[b];
+// linijnyj RGB kazhdogo pigmenta iz ego dot-cveta
+PIGS.forEach(function(p){
+  var c=hexToRgb(p.dot);
+  p._lin=[srgb2lin(c[0]),srgb2lin(c[1]),srgb2lin(c[2])];
+  p._white=(p.name.indexOf('BIANCO')>=0 || p.name.indexOf('WHITE')>=0);
+});
+function mixRGB(weights){ // weights: [{idx,w}], w — chastki
+  // koncentracii berutsya napryamую iz proporcij (bez sinteticheskogo t) — chtoby polzunki veli sebya predskazuemo
+  var C=weights.map(function(x){return x.w;});
+  var s=C.reduce(function(a,b){return a+b;},0); if(s<=0) return [255,255,255];
+  C=C.map(function(v){return v/s;});
+  // subtraktivno: peremnozhaem otrazheniya po vesam (R^w), otdel'no sobiraem belila
+  var out=[1,1,1], whiteW=0, whiteLin=[1,1,1];
+  for(var k=0;k<3;k++){
+    var acc=1;
+    for(var j=0;j<weights.length;j++){
+      var p=PIGS[weights[j].idx];
+      if(p._white){ if(k===0){whiteW+=C[j];} whiteLin[k]=p._lin[k]; continue; }
+      var refl=Math.min(Math.max(p._lin[k],1e-4),1);
+      acc*=Math.pow(refl, C[j]);
+    }
+    out[k]=acc;
   }
-  X*=ENGINE.Xw;Y*=ENGINE.Yw;Z*=ENGINE.Zw;
-  var M=ENGINE.M;
-  return [lin2srgb(M[0][0]*X+M[0][1]*Y+M[0][2]*Z),
-          lin2srgb(M[1][0]*X+M[1][1]*Y+M[1][2]*Z),
-          lin2srgb(M[2][0]*X+M[2][1]*Y+M[2][2]*Z)];
+  // belila kroyut: podmeshivaem svetlotu proporcional'no ih dole (укрывисто, не прозрачно)
+  if(whiteW>0){
+    var wMix=Math.pow(whiteW,1.6); // podobrano: 50/50 chyorn.+bel. dayot sredniy seryj
+    for(var k2=0;k2<3;k2++) out[k2]=out[k2]*(1-wMix)+whiteLin[k2]*wMix;
+  }
+  return [lin2srgb(out[0]),lin2srgb(out[1]),lin2srgb(out[2])];
 }
 
 /* ===== view switching ===== */
