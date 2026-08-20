@@ -857,7 +857,7 @@ function openLibColor(hex){
       +'<button class="m-act primary" id="mLibLab"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 3h6M10 3v5L5.5 18a2 2 0 0 0 1.9 2.6h9.2A2 2 0 0 0 18.5 18L14 8V3"/><path d="M7.5 14h9"/></svg>В лабораторію</button>'
     +'</div>';
   document.getElementById('mLibOpen').onclick=function(){ openColor(near.c); };
-  document.getElementById('mLibLab').onclick=function(){ simTarget=hex; for(var i=0;i<PIGS.length;i++) setPig(i,0,'load'); closeModal(); switchView('sim'); updateSim(); showToast('Колір «'+ua+'» перенесено в лабораторію як ціль'); };
+  document.getElementById('mLibLab').onclick=function(){ simTarget=hex; closeModal(); switchView('sim'); applyRecipeFromHex(hex); showToast('Колір «'+ua+'» перенесено — рецепт підібрано'); };
   overlay.classList.add('show');document.body.style.overflow='hidden';
 }
 window.openLibColor=openLibColor;
@@ -913,6 +913,52 @@ function setPig(i,v,src){
   var num=document.getElementById('num'+i);
   if(num)num.value=fmtVal(v);
   updateSim();
+}
+/* ===== автопідбір рецепта під цільовий колір з наявних пігментів ===== */
+function solveRecipe(targetHex){
+  var c=hexToRgb(targetHex), tl=rgb2lab(c[0],c[1],c[2]);
+  var white=-1,black=-1;
+  for(var i=0;i<PIGS.length;i++){ if(PIGS[i]._white)white=i; if(PIGS[i].name.indexOf('NERO')>=0)black=i; }
+  // ранжуємо кольорові пігменти за близькістю відтінку їх dot-кольору до цілі
+  var colored=[];
+  for(var j=0;j<PIGS.length;j++){ if(j===white||j===black)continue;
+    var pc=hexToRgb(PIGS[j].dot); colored.push({idx:j,d:deltaE(tl,rgb2lab(pc[0],pc[1],pc[2]))}); }
+  colored.sort(function(a,b){return a.d-b.d;});
+  var pool=[]; if(white>=0)pool.push(white); if(black>=0)pool.push(black);
+  pool=pool.concat(colored.slice(0,5).map(function(x){return x.idx;}));
+  function fit(subset){
+    var w=subset.map(function(){return 1/subset.length;}); var step=0.4;
+    function cost(ww){var act=[];for(var q=0;q<subset.length;q++)if(ww[q]>0.001)act.push({idx:subset[q],w:ww[q]});
+      if(!act.length)return 1e9;var rgb=mixRGB(act);return deltaE(tl,rgb2lab(rgb[0],rgb[1],rgb[2]));}
+    var cur=cost(w);
+    for(var it=0;it<160;it++){var imp=false;
+      for(var q=0;q<subset.length;q++)for(var s=-1;s<=1;s+=2){var w2=w.slice();w2[q]=Math.max(0,w2[q]+s*step);var c2=cost(w2);if(c2<cur){w=w2;cur=c2;imp=true;}}
+      if(!imp)step*=0.6; if(step<0.004)break;
+    }
+    return {w:w,dE:cur};
+  }
+  function combos(arr,k){var res=[];(function rec(st,cur){if(cur.length===k){res.push(cur.slice());return;}for(var i=st;i<arr.length;i++){cur.push(arr[i]);rec(i+1,cur);cur.pop();}})(0,[]);return res;}
+  var best=null;
+  for(var k=2;k<=4;k++){
+    var subs=combos(pool,k);
+    for(var si=0;si<subs.length;si++){
+      var r=fit(subs[si]); var score=r.dE + k*0.8;
+      if(!best||score<best.score){best={subset:subs[si],w:r.w,dE:r.dE,k:k,score:score};}
+    }
+    if(best&&best.dE<2)break;
+  }
+  var sum=best.w.reduce(function(a,b){return a+b;},0);
+  var out={}; best.subset.forEach(function(idx,jj){var p=best.w[jj]/sum*100; if(p>0.5)out[idx]=Math.round(p*10)/10;});
+  return {pct:out,dE:best.dE};
+}
+function applyRecipeFromHex(targetHex){
+  var sol=solveRecipe(targetHex);
+  for(var i=0;i<PIGS.length;i++){ simVals[i]=(sol.pct[i]||0);
+    var sl=pigListEl.querySelector('input[type=range][data-i="'+i+'"]'); if(sl)sl.value=simVals[i];
+    var num=document.getElementById('num'+i); if(num)num.value=fmtVal(simVals[i]);
+  }
+  updateSim();
+  return sol;
 }
 function updateSim(){
   var total=simVals.reduce(function(a,b){return a+b;},0);
@@ -1067,11 +1113,10 @@ function copyRecipeText(x){
 }
 function sendColorToLab(x){
   simTarget=x.h;
-  for(var i=0;i<PIGS.length;i++) setPig(i,0,'load');
   closeModal();
   switchView('sim');
-  updateSim();
-  showToast('Колір HP '+x.c+' перенесено в лабораторію як ціль');
+  applyRecipeFromHex(x.h);
+  showToast('Колір HP '+x.c+' перенесено — рецепт підібрано');
 }
 function loadRecipeToSim(recipe){
   for(var i=0;i<PIGS.length;i++) setPig(i,0,'load');
@@ -1155,10 +1200,9 @@ function camRenderResult(rawRgb){
 }
 function sendCameraColorToLab(hex,nearest){
   simTarget=hex;
-  for(var i=0;i<PIGS.length;i++) setPig(i,0,'load');
   switchView('sim');
-  updateSim();
-  showToast('Колір з камери перенесено в лабораторію як ціль');
+  applyRecipeFromHex(hex);
+  showToast('Колір з камери перенесено — рецепт підібрано');
 }
 var lastSampleTS=0;
 function camLiveLoop(){
